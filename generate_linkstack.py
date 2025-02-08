@@ -463,6 +463,8 @@ def group_containers(containers):
         grouped_containers[group].append(container)
     
     grouped_containers = dict(sorted(grouped_containers.items(), key=lambda x: x[0]))
+    for group in grouped_containers:
+        grouped_containers[group].sort(key=lambda x: x["name"])
         
     return grouped_containers 
        

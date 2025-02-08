@@ -1,0 +1,33 @@
+{
+    "title": "My LinkTree",  
+    "servers": [
+        {
+            "name": "Docker01",
+            "socket_path": "http://docker01:2375" 
+        },
+        {
+            "name": "Docker02",
+            "socket_path": "http://docker02:2375"
+        },
+        {
+            "name": "hassio",
+            "socket_path": "http://hassio:2375"
+        }, 
+        {
+            "name": "pi-hole",
+            "socket_path": "http://pi-hole:2375"
+        },
+        {
+            "name": "Fusion",
+            "socket_path": "http://fusion01:2375"
+        },
+        {
+            "name": "Cachipay",
+            "socket_path": "http://cachi:2375"
+        },
+        {
+            "name": "Dev01",
+            "socket_path": "http://Dev01:2375"
+        }
+    ]
+}

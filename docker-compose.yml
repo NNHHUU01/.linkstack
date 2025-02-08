@@ -1,0 +1,11 @@
+
+services:
+  linkstack:
+    build: .  # Build the image using the Dockerfile in the current directory
+    container_name: linkstack
+    volumes:
+      - ./conf.json:/app/conf.json
+      - ./templates:/app/templates
+    ports:
+      - "${TAILSCALE_IP}:8087:8080"
+    restart: unless-stopped

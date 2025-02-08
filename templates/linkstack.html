@@ -1,0 +1,409 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>LinkTree</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+        <style>
+            /* Base styles */
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                color: #333;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                flex-direction: column;
+                transition: background-color 0.3s, color 0.3s;
+            }
+
+            body.dark-mode {
+                background-color: #1e1e1e;
+                color: #f4f4f9;
+            }
+
+            .linkstack {
+                max-width: 800px;
+                width: 100%;
+                padding: 20px;
+                text-align: center;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+                color: #444;
+                margin-bottom: 20px;
+            }
+
+            .dark-mode h1 {
+                color: #f4f4f9;
+            }
+
+            .group {
+                margin-bottom: 20px;
+            }
+
+            .group-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                background-color: #007bff;
+                color: #fff;
+                padding: 10px;
+                border-radius: 8px;
+                cursor: pointer;
+            }
+
+            .dark-mode .group-header {
+                background-color: #005bb5;
+            }
+
+            .group-header h2 {
+                margin: 0;
+                font-size: 1.5rem;
+            }
+
+            .group-header i {
+                font-size: 1.2rem;
+            }
+
+            .group-content {
+                display: none;
+                padding: 10px;
+                background-color: #fff;
+                border-radius: 0 0 8px 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .dark-mode .group-content {
+                background-color: #2d2d2d;
+            }
+
+            .linkstack-item {
+                display: flex;
+                align-items: center;
+                background-color: #f9f9f9;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                margin: 10px 0;
+                padding: 15px;
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+
+            .dark-mode .linkstack-item {
+                background-color: #CFD8DC;
+            }
+
+            .linkstack-item:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .linkstack-icon {
+                font-size: 24px;
+                margin-right: 15px;
+                color: #007bff;
+            }
+
+            .dark-mode .linkstack-icon {
+                color: #005bb5;
+            }
+
+            .linkstack-name {
+                font-size: 1.2rem;
+                color: #007bff;
+                text-decoration: none;
+            }
+
+            .dark-mode .linkstack-name {
+                color: #005bb5;
+            }
+
+            .linkstack-name:hover {
+                text-decoration: underline;
+            }
+
+            /* Toggle switch */
+            .theme-toggle {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .theme-toggle label {
+                font-size: 1rem;
+                cursor: pointer;
+            }
+
+            .theme-toggle input[type="checkbox"] {
+                display: none;
+            }
+
+            .theme-toggle .slider {
+                width: 40px;
+                height: 20px;
+                background-color: #ccc;
+                border-radius: 20px;
+                position: relative;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .theme-toggle .slider::before {
+                content: '';
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                background-color: #fff;
+                border-radius: 50%;
+                top: 2px;
+                left: 2px;
+                transition: transform 0.3s;
+            }
+
+            .theme-toggle input[type="checkbox"]:checked + .slider {
+                background-color: #007bff;
+            }
+
+            .theme-toggle input[type="checkbox"]:checked + .slider:before {
+                transform: translateX(20px);
+            }
+
+            /* Responsive styles */
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 2rem;
+                }
+
+                .group-header h2 {
+                    font-size: 1.2rem;
+                }
+
+                .linkstack-item {
+                    padding: 10px;
+                }
+
+                .linkstack-icon {
+                    font-size: 20px;
+                    margin-right: 10px;
+                }
+
+                .linkstack-name {
+                    font-size: 1rem;
+                }
+            }
+
+            @media (max-width: 480px) {
+                h1 {
+                    font-size: 1.5rem;
+                }
+
+                .group-header h2 {
+                    font-size: 1rem;
+                }
+
+                .linkstack-item {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    padding: 15px;
+                }
+
+                .linkstack-icon {
+                    margin-bottom: 10px;
+                }
+
+                .linkstack-name {
+                    font-size: 0.9rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="theme-toggle">
+            <label for="theme-toggle">Dark Mode</label>
+            <input type="checkbox" id="theme-toggle">
+            <span class="slider"></span>
+        </div>
+        <div class="linkstack">
+            <h1>LinkTree</h1>
+            
+            <div class="group">
+                <div class="group-header" onclick="toggleGroup('Media')">
+                    <h2>Media</h2>
+                    <i id="icon-Media" class="fas fa-plus"></i>
+                </div>
+                <div class="group-content" id="content-Media">
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:9003" class="linkstack-name" target="_blank">transmission</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:9009" class="linkstack-name" target="_blank">sonarr</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:9010" class="linkstack-name" target="_blank">bazarr</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:9005" class="linkstack-name" target="_blank">radarr</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:6246" class="linkstack-name" target="_blank">maintainerr</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:5055" class="linkstack-name" target="_blank">overseerr</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:8181" class="linkstack-name" target="_blank">tautulli</a>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="group">
+                <div class="group-header" onclick="toggleGroup('Admin')">
+                    <h2>Admin</h2>
+                    <i id="icon-Admin" class="fas fa-plus"></i>
+                </div>
+                <div class="group-content" id="content-Admin">
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:3001" class="linkstack-name" target="_blank">uptime-kuma</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:8083" class="linkstack-name" target="_blank">PDF</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:9000" class="linkstack-name" target="_blank">portainer</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:1880" class="linkstack-name" target="_blank">nodered</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://docker01:61208" class="linkstack-name" target="_blank">glances</a>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="group">
+                <div class="group-header" onclick="toggleGroup('Hassio')">
+                    <h2>Hassio</h2>
+                    <i id="icon-Hassio" class="fas fa-plus"></i>
+                </div>
+                <div class="group-content" id="content-Hassio">
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://hassio:8443" class="linkstack-name" target="_blank">Unify</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://hassio:1880" class="linkstack-name" target="_blank">NodeRed</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://hassio:8123" class="linkstack-name" target="_blank">Hassio 4853</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://hassio:5000" class="linkstack-name" target="_blank">Frigate</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://hassio:5007" class="linkstack-name" target="_blank">Wyze Bridge</a>
+                    </div>
+                    
+                    <div class="linkstack-item">
+                        <i class="fas fa-link linkstack-icon"></i>
+                        <a href="http://hassio:3080" class="linkstack-name" target="_blank">Tasmota Admin</a>
+                    </div>
+                    
+                </div>
+            </div>
+            
+        </div>
+        <script>
+            // Toggle group visibility
+            function toggleGroup(group) {
+                const content = document.getElementById(`content-${group}`);
+                const icon = document.getElementById(`icon-${group}`);
+                if (content.style.display === "none") {
+                    content.style.display = "block";
+                    icon.classList.remove("fa-plus");
+                    icon.classList.add("fa-minus");
+                } else {
+                    content.style.display = "none";
+                    icon.classList.remove("fa-minus");
+                    icon.classList.add("fa-plus");
+                }
+            }
+
+            // Collapse all groups by default
+            document.querySelectorAll(".group-content").forEach(content => {
+                content.style.display = "none";
+            });
+
+            // Dark mode toggle
+            const themeToggle = document.getElementById("theme-toggle");
+            const body = document.body;
+
+            // Load saved theme preference
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                body.classList.add("dark-mode");
+                themeToggle.checked = true;
+                console.log("Loaded dark mode from localStorage");
+            } else {
+                console.log("Loaded light mode from localStorage");
+            }
+
+            // Toggle dark mode
+            themeToggle.addEventListener("change", () => {
+                if (themeToggle.checked) {
+                    body.classList.add("dark-mode");
+                    localStorage.setItem("theme", "dark");
+                    console.log("Switched to dark mode");
+                } else {
+                    body.classList.remove("dark-mode");
+                    localStorage.setItem("theme", "light");
+                    console.log("Switched to light mode");
+                }
+            });
+        </script>
+    </body>
+    </html>
+    

@@ -18,16 +18,17 @@
             "socket_path": "http://pi-hole:2375"
         },
         {
-            "name": "Fusion",
-            "socket_path": "http://fusion01:2375"
-        },
-        {
-            "name": "Cachipay",
-            "socket_path": "http://cachi:2375"
+            "name": "fusionPBX",
+            "socket_path": "http://fusionPBX:2375"
         },
         {
             "name": "Dev01",
-            "socket_path": "http://Dev01:2375"
+            "socket_path": "http://dev01:2375"
+        }, 
+        {
+            "name": "Cachipay",
+            "socket_path": "http://cachi:2375"
         }
+ 
     ]
 }

@@ -20,7 +20,7 @@ from rich.panel import Panel
 console = Console(color_system="auto")
 
 # Install rich traceback handler
-install()
+install(width=80)
 
 # Configure logging with rich handler
 logging.basicConfig(
@@ -141,6 +141,11 @@ def generate_linkstack(grouped_containers, title):
                 padding: 10px;
                 border-radius: 8px;
                 cursor: pointer;
+                transition: color 0.3s;
+            }
+
+            .group-header:hover {
+                color: yellow;
             }
 
             .dark-mode .group-header {
@@ -411,6 +416,9 @@ def get_exposed_containers(socket_path):
         containers = response.json()
         exposed_containers = []
         for container in containers:
+            container_name = container.get("Names", [""])[0].strip("/")
+            server_name = get_server_name(socket_path)
+            print (f"Server : {server_name},  Container Name: {container_name}")
             
             labels = container.get("Labels", {})
             if labels.get("shareable") == "true":
@@ -418,21 +426,21 @@ def get_exposed_containers(socket_path):
                 exposed_port = labels.get("exposed_port", "80")
                 group = labels.get("group", "Other")
                 DirectLink = labels.get("directlink", "")
-                server_name = get_server_name(socket_path)
                 
                 url = DirectLink if DirectLink else f"http://{server_name}:{exposed_port}"
                 
                 exposed_containers.append({
                     "name": f"{name} ({server_name})",
                     "url": url,
-                    "group": group
+                    "group": group,
+                    "server": server_name
                 })
-                console.print(f"Found exposed container: [bold green]{name}[/bold green] ([cyan]{server_name}:{exposed_port}[/cyan]) in group: [yellow]{group}[/yellow]")
+                # console.print(f"Found exposed container: [bold green]{name}[/bold green] ([cyan]{server_name}:{exposed_port}[/cyan]) in group: [yellow]{group}[/yellow]")
         
         exposed_containers.sort(key=lambda x: x["group"])
         return exposed_containers
     except requests.exceptions.RequestException as e:
-        console.print(f"[bold red]Failed to connect to Docker server at {socket_path}:[/bold red]")
+        console.print(f"[bold red]Failed to connect to Docker server at {socket_path}:[/bold red] \n {e}")
         return []
 
 # Print containers in a rich table
@@ -441,9 +449,10 @@ def print_containers_table(containers):
     table.add_column("Name", style="cyan", justify="left")
     table.add_column("URL", style="blue", justify="left")
     table.add_column("Group", style="green", justify="left")
+    table.add_column("Server", style="green", justify="left")
 
     for container in containers:
-        table.add_row(container["name"], container["url"], container["group"])
+        table.add_row(container["name"], container["url"], container["group"], container["server"])
 
     console.print(table)
 
@@ -507,7 +516,15 @@ def print_server_container_table(containers):
 def update_linkstack(selected_servers):
     containers = []
     for server in track(config["servers"], description="Querying Docker servers..."):
+        
+        # Ping the server to check if it's up
+        response = os.system(f"ping -c 1 {server['name']} > /dev/null 2>&1")
+        if response != 0:
+            console.print(f"[bold red]Server {server['name']} is not reachable. Skipping...[/bold red]")
+            continue
+        
         if server['name'] in selected_servers or 'all' in selected_servers:
+            
             console.print(f"Querying Docker server: [bold blue]{server['name']}[/bold blue] ([cyan]{server['socket_path']}[/cyan])")
             containers.extend(get_exposed_containers(server["socket_path"]))
     

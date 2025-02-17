@@ -23,7 +23,7 @@
         },
         {
             "name": "Dev01",
-            "socket_path": "http://dev01:2375"
+            "socket_path": "unix://var/run/docker.sock"
         }, 
         {
             "name": "Cachipay",

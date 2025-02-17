@@ -5,9 +5,10 @@ from urllib.parse import urlparse
 from jinja2 import Template
 from flask import Flask, request, render_template_string
 import os
+from datetime import datetime
+import docker
 
 from collections import defaultdict
-
 from rich.console import Console
 from rich.logging import RichHandler
 from rich import print
@@ -32,9 +33,7 @@ logging.basicConfig(
 # Load configuration from conf.json once
 config = None
 
-import os
-import json
-from datetime import datetime
+
 
 # Global variables to store config and its last modification time
 config = None
@@ -326,7 +325,7 @@ def generate_linkstack(grouped_containers, title):
             {% for group, containers in grouped_containers.items() %}
             <div class="group">
                 <div class="group-header" onclick="toggleGroup('{{ group }}')">
-                    <h2>{{ group }}</h2>
+                    <h2>{{ group }} ({{ containers|length }})</h2>
                     <i id="icon-{{ group }}" class="fas fa-plus"></i>
                 </div>
                 <div class="group-content" id="content-{{ group }}">
@@ -408,38 +407,36 @@ def generate_linkstack(grouped_containers, title):
     return template.render(grouped_containers=grouped_containers, title=title)
 
 # Query Docker Socket API for exposed containers
-def get_exposed_containers(socket_path):
+def get_exposed_containers(socket_path, server_name1):
     try:
-        response = requests.get(f"{socket_path}/containers/json", timeout=5)
+        client = docker.DockerClient(base_url=socket_path)
+        containers = client.containers.list(all=True)
         
-        response.raise_for_status()
-        containers = response.json()
         exposed_containers = []
         for container in containers:
-            container_name = container.get("Names", [""])[0].strip("/")
+            container_name = container.name
             server_name = get_server_name(socket_path)
-            print (f"Server : {server_name},  Container Name: {container_name}")
-            
-            labels = container.get("Labels", {})
+            labels = container.labels
+
             if labels.get("shareable") == "true":
-                name = labels.get("name", "Unnamed")
+                name = labels.get("name", container_name)
                 exposed_port = labels.get("exposed_port", "80")
                 group = labels.get("group", "Other")
-                DirectLink = labels.get("directlink", "")
+                direct_link = labels.get("directlink", "")
                 
-                url = DirectLink if DirectLink else f"http://{server_name}:{exposed_port}"
+                url = direct_link if direct_link else f"http://{server_name}:{exposed_port}"
                 
                 exposed_containers.append({
-                    "name": f"{name} ({server_name})",
+                    "name": f"{name} ({server_name1})",
                     "url": url,
                     "group": group,
-                    "server": server_name
+                    "server": server_name1
                 })
-                # console.print(f"Found exposed container: [bold green]{name}[/bold green] ([cyan]{server_name}:{exposed_port}[/cyan]) in group: [yellow]{group}[/yellow]")
+                console.print(f"Found exposed container: [bold green]{name}[/bold green] ([cyan]{server_name}:{exposed_port}[/cyan]) in group: [yellow]{group}[/yellow]")
         
         exposed_containers.sort(key=lambda x: x["group"])
         return exposed_containers
-    except requests.exceptions.RequestException as e:
+    except docker.errors.DockerException as e:
         console.print(f"[bold red]Failed to connect to Docker server at {socket_path}:[/bold red] \n {e}")
         return []
 
@@ -526,7 +523,7 @@ def update_linkstack(selected_servers):
         if server['name'] in selected_servers or 'all' in selected_servers:
             
             console.print(f"Querying Docker server: [bold blue]{server['name']}[/bold blue] ([cyan]{server['socket_path']}[/cyan])")
-            containers.extend(get_exposed_containers(server["socket_path"]))
+            containers.extend(get_exposed_containers(server["socket_path"], server["name"]))
     
     # Print the new table
     print_server_container_table(containers)

@@ -2,6 +2,10 @@
     "title": "My LinkTree",  
     "servers": [
         {
+            "name": "Dev01",
+            "socket_path": "unix://var/run/docker.sock"
+        }, 
+        {
             "name": "Docker01",
             "socket_path": "http://docker01:2375" 
         },
@@ -22,13 +26,8 @@
             "socket_path": "http://fusionPBX:2375"
         },
         {
-            "name": "Dev01",
-            "socket_path": "unix://var/run/docker.sock"
-        }, 
-        {
             "name": "Cachipay",
             "socket_path": "http://cachi:2375"
         }
- 
     ]
 }
